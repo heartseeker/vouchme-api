@@ -1,3 +1,5 @@
+const jwt = require('jsonwebtoken');
+
 /**
  * HTTP Server Settings
  * (sails.config.http)
@@ -23,6 +25,15 @@ module.exports.http = {
 
   middleware: {
 
+    foobar: function (req, res, next) {
+      console.log("Requested :: ", req.method, req.url);
+      if (req.url === '/users') {
+        return res.status(404).send('fail');
+      };
+      console.log("Requested :: ", req.method, req.url);
+      return next();
+    },
+
   /***************************************************************************
   *                                                                          *
   * The order in which middleware should be run for HTTP request. (the Sails *
@@ -30,23 +41,25 @@ module.exports.http = {
   *                                                                          *
   ***************************************************************************/
 
-    // order: [
-    //   'startRequestTimer',
-    //   'cookieParser',
-    //   'session',
-    //   'myRequestLogger',
-    //   'bodyParser',
-    //   'handleBodyParserError',
-    //   'compress',
-    //   'methodOverride',
-    //   'poweredBy',
-    //   '$custom',
-    //   'router',
-    //   'www',
-    //   'favicon',
-    //   '404',
-    //   '500'
-    // ],
+ order: [
+      
+      'startRequestTimer',
+      'cookieParser',
+      'session',
+      'myRequestLogger',
+      'bodyParser',
+      'handleBodyParserError',
+      'compress',
+      'methodOverride',
+      'poweredBy',
+      '$custom',
+      'authenticate',
+      'router',
+      'www',
+      'favicon',
+      '404',
+      '500'
+    ],
 
   /****************************************************************************
   *                                                                           *
@@ -58,6 +71,42 @@ module.exports.http = {
     //     console.log("Requested :: ", req.method, req.url);
     //     return next();
     // }
+   
+
+    authenticate: function (req, res, next) {
+
+      const excluded = [
+        '/users/login',
+        '/users/social',
+        '/users'
+      ];
+      // excluded post method
+      if (excluded.includes(req.url)) {
+        if (req.method === 'POST' || req.method === 'OPTIONS') {
+          return next();
+        }
+      }
+
+      const token = req.header('x-auth');
+      let decoded;
+      try {
+        decoded = jwt.verify(token, 'abc123');
+      } catch (e) {
+        return res.status(401).send('Not Allowed');
+      }
+      
+      User.findOne({
+        'id': decoded.id,
+        'tokens.token': token,
+        'tokens.access': 'auth'
+      }).exec((err, user) => {
+        if (user) {
+          return next();
+        } else {
+          return res.status(401).send('Not Allowed');
+        }
+      })
+    }
 
 
   /***************************************************************************
