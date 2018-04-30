@@ -150,7 +150,7 @@ module.exports = {
 
     generateAuthToken(user, res) {
         const access = 'auth';
-        const token = jwt.sign({ id: user.id, access }, 'abc123').toString();
+        const token = jwt.sign({ id: user.id, access }, 'abc123', { expiresIn: '8h' }).toString();
 
         let tokens = [];
         if (user.tokens) {
@@ -161,7 +161,7 @@ module.exports = {
         }
 
         User.update({id: user.id}, {tokens: tokens}).exec((err, userResp) => {
-            res.send(userResp);
+            res.send({token: token});
         })
     },
 
