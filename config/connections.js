@@ -57,13 +57,13 @@ module.exports.connections = {
   *                                                                          *
   ***************************************************************************/
   mongodb: {
-    adapter: 'sails-mongo',
-    host: 'localhost',
-    port: 27017,
+    // adapter: 'sails-mongo',
+    // host: 'localhost',
+    // port: 27017,
     // user: 'username', //optional
     // password: 'password', //optional
-    database: 'vouchme' //optional
-    // url: 'mongodb://vouchadmin:dbvouch123@ds221228.mlab.com:21228/vouchme'
+    // database: 'vouchme' //optional
+    url: 'mongodb://vouchadmin:dbvouch123@ds221228.mlab.com:21228/vouchme'
   },
 
   /***************************************************************************
